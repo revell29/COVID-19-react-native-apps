@@ -1,0 +1,41 @@
+{
+    "name": "Covid19",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "android": "react-native run-android",
+        "ios": "react-native run-ios",
+        "start": "react-native start",
+        "test": "jest",
+        "lint": "eslint ."
+    },
+    "dependencies": {
+        "axios": "^0.19.2",
+        "moment": "^2.24.0",
+        "react": "16.9.0",
+        "react-native": "0.61.5",
+        "react-native-chart-kit": "^5.2.0",
+        "react-native-gesture-handler": "^1.6.1",
+        "react-native-maps": "^0.27.1",
+        "react-native-reanimated": "^1.7.0",
+        "react-native-router-flux": "^4.2.0",
+        "react-native-screens": "^2.4.0",
+        "react-native-svg": "^12.0.3",
+        "react-native-thumbnail-video": "^0.1.2",
+        "react-native-vector-icons": "^6.6.0",
+        "react-navigation": "^4.3.3"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.9.0",
+        "@babel/runtime": "^7.9.2",
+        "@react-native-community/eslint-config": "^0.0.7",
+        "babel-jest": "^25.1.0",
+        "eslint": "^6.8.0",
+        "jest": "^25.1.0",
+        "metro-react-native-babel-preset": "^0.59.0",
+        "react-test-renderer": "16.9.0"
+    },
+    "jest": {
+        "preset": "react-native"
+    }
+}
