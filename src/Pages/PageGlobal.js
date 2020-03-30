@@ -1,61 +1,67 @@
+/* eslint-disable no-const-assign */
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from 'react';
 import { View, Text, SafeAreaView, FlatList, StyleSheet } from 'react-native';
 import MyStatusBar from '../Components/MyStatusBar';
 import NavbarPage from '../Components/NavbarPage';
+import { getGlobalData } from '../utils/ApiService';
 import SearchBar from '../Components/SearchBar';
 import EmptyData from '../Components/EmptyData';
-import { getDataProvinsi } from '../utils/ApiService';
+import _ from 'lodash';
+import Moment from 'moment';
 import Icon from 'react-native-vector-icons/Entypo';
 
-export default class PageProvin extends Component {
+export default class PageGlobal extends Component {
   constructor(props) {
     super(props);
     this.state = {
       data: [],
       fullData: [],
-      text: '',
       isFetching: true,
+      text: '',
     };
   }
 
   componentDidMount() {
-    this.getDataProvinsi();
+    this.getGlobal();
   }
 
-  async getDataProvinsi() {
-    await getDataProvinsi()
+  getGlobal = _.debounce(async () => {
+    await getGlobalData()
       .then(response => {
-        this.setState({ data: response.data, fullData: response.data, isFetching: false });
+        response.map((item, key) => {
+          item.id = key;
+        });
+        this.setState({ fullData: response, data: response, isFetching: false });
       })
       .catch(error => console.log(error));
-  }
-
-  onRefresh = () => {
-    this.setState({ isFetching: true });
-    setTimeout(() => {
-      this.getDataProvinsi();
-    }, 1000);
-  };
+  }, 250);
 
   handleSearch = text => {
     const query = text.trim().toLowerCase();
     const data = this.state.fullData;
     const newData = data.filter(q => {
-      return q.provinsi.toLowerCase().match(query);
+      return q.countryRegion.toLowerCase().match(query);
     });
     this.setState({ data: newData, text: text });
+  };
+
+  onRefresh = () => {
+    this.setState({ isFetching: true });
+    setTimeout(() => {
+      this.getGlobal();
+    }, 1000);
   };
 
   renderItem = ({ item }) => {
     return (
       <View style={styles.card}>
         <View>
-          <Text style={{ fontSize: 14, color: '#E5DDDD' }}>{item.provinsi}</Text>
-          <Text style={{ fontSize: 13, color: '#FC7302' }}>Positif: {item.kasusPosi}</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 140 }}>
-            <Text style={{ fontSize: 13, color: '#04AD95' }}>Sembuh: {item.kasusSemb}</Text>
-            <Text style={{ fontSize: 13, color: '#F82449' }}>Meninggal: {item.kasusMeni}</Text>
+          <Text style={{ fontSize: 14, color: '#E5DDDD' }}>{item.countryRegion}</Text>
+          <Text style={{ fontSize: 13, color: '#FC7302' }}>Positif: {item.confirmed}</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 180 }}>
+            <Text style={{ fontSize: 13, color: '#04AD95' }}>Sembuh: {item.recovered}</Text>
+            <Text style={{ fontSize: 13, color: '#F82449' }}>Meninggal: {item.deaths}</Text>
           </View>
         </View>
         <View
@@ -72,17 +78,17 @@ export default class PageProvin extends Component {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#171B1E' }}>
         <MyStatusBar />
-        <NavbarPage title="Provinsi" />
+        <NavbarPage title="Data Dunia" />
         <View>
           <SearchBar onChangeText={this.handleSearch} placeholder="Search" />
           <FlatList
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
-              paddingBottom: 150,
+              paddingBottom: 115,
             }}
             onRefresh={() => this.onRefresh()}
             refreshing={this.state.isFetching}
-            keyExtractor={item => item.fid.toString()}
+            keyExtractor={item => item.id}
             data={this.state.data}
             renderItem={this.renderItem}
           />

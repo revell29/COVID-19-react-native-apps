@@ -1,70 +1,78 @@
+/* eslint-disable no-const-assign */
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from 'react';
-import { View, Text, SafeAreaView, FlatList, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Linking,
+  Platform,
+} from 'react-native';
 import MyStatusBar from '../Components/MyStatusBar';
 import NavbarPage from '../Components/NavbarPage';
+import { getNewsTerkini } from '../utils/ApiService';
 import SearchBar from '../Components/SearchBar';
 import EmptyData from '../Components/EmptyData';
-import { getDataProvinsi } from '../utils/ApiService';
-import Icon from 'react-native-vector-icons/Entypo';
+import _ from 'lodash';
+import Screen from '../constants/Layout';
 
-export default class PageProvin extends Component {
+export default class News extends Component {
   constructor(props) {
     super(props);
     this.state = {
       data: [],
       fullData: [],
-      text: '',
       isFetching: true,
+      text: '',
     };
   }
 
   componentDidMount() {
-    this.getDataProvinsi();
+    this.getGlobal();
   }
 
-  async getDataProvinsi() {
-    await getDataProvinsi()
+  getGlobal = _.debounce(async () => {
+    await getNewsTerkini()
       .then(response => {
-        this.setState({ data: response.data, fullData: response.data, isFetching: false });
+        response.data.map((item, key) => {
+          item.id = key;
+        });
+        this.setState({ fullData: response.data, data: response.data, isFetching: false });
       })
       .catch(error => console.log(error));
-  }
-
-  onRefresh = () => {
-    this.setState({ isFetching: true });
-    setTimeout(() => {
-      this.getDataProvinsi();
-    }, 1000);
-  };
+  }, 250);
 
   handleSearch = text => {
     const query = text.trim().toLowerCase();
     const data = this.state.fullData;
     const newData = data.filter(q => {
-      return q.provinsi.toLowerCase().match(query);
+      return q.title.toLowerCase().match(query);
     });
     this.setState({ data: newData, text: text });
   };
 
+  onRefresh = () => {
+    this.setState({ isFetching: true });
+    setTimeout(() => {
+      this.getGlobal();
+    }, 1000);
+  };
+
   renderItem = ({ item }) => {
     return (
-      <View style={styles.card}>
-        <View>
-          <Text style={{ fontSize: 14, color: '#E5DDDD' }}>{item.provinsi}</Text>
-          <Text style={{ fontSize: 13, color: '#FC7302' }}>Positif: {item.kasusPosi}</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 140 }}>
-            <Text style={{ fontSize: 13, color: '#04AD95' }}>Sembuh: {item.kasusSemb}</Text>
-            <Text style={{ fontSize: 13, color: '#F82449' }}>Meninggal: {item.kasusMeni}</Text>
+      <TouchableOpacity onPress={() => Linking.openURL(item.link)}>
+        <View style={styles.card}>
+          <Text style={{ fontSize: 15, color: '#E5DDDD', fontWeight: '700' }}>{item.title}</Text>
+          <Text style={{ fontSize: 12, color: '#E5DDDD', marginTop: 8 }}>{item.text}</Text>
+          <View style={styles.footer}>
+            <Text style={{ color: 'white' }}>{item.author}</Text>
+            <Text style={{ color: 'white' }}>{item.date}</Text>
           </View>
         </View>
-        <View
-          style={{
-            justifyContent: 'center',
-          }}>
-          <Icon name="info-with-circle" color="#048AD6" size={20} />
-        </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -72,17 +80,17 @@ export default class PageProvin extends Component {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#171B1E' }}>
         <MyStatusBar />
-        <NavbarPage title="Provinsi" />
+        <NavbarPage title="Info Terkini" />
         <View>
           <SearchBar onChangeText={this.handleSearch} placeholder="Search" />
           <FlatList
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
-              paddingBottom: 150,
+              paddingBottom: Screen.window.height - (Platform.OS === 'ios' ? 750 : 650),
             }}
             onRefresh={() => this.onRefresh()}
             refreshing={this.state.isFetching}
-            keyExtractor={item => item.fid.toString()}
+            keyExtractor={item => item.id}
             data={this.state.data}
             renderItem={this.renderItem}
           />
@@ -96,13 +104,15 @@ export default class PageProvin extends Component {
 const styles = StyleSheet.create({
   card: {
     padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: '#1B232F',
     marginBottom: 8,
     marginHorizontal: 8,
     borderRadius: 8,
-    height: 60,
+    // height: 80,
+  },
+  footer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import com.BV.LinearGradient.LinearGradientPackage;
 import com.swmansion.reanimated.ReanimatedPackage;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.facebook.react.ReactNativeHost;
@@ -13,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
+import com.reactnativecommunity.webview.RNCWebViewPackage;
 import java.util.List;
 import java.util.Arrays;
 
@@ -28,8 +30,9 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new LinearGradientPackage(),
             new ReanimatedPackage(),new MapsPackage(),
-            new RNGestureHandlerPackage(),new VectorIconsPackage());
+            new RNGestureHandlerPackage(),new VectorIconsPackage(), new RNCWebViewPackage());
         }
 
         @Override

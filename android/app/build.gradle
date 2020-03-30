@@ -149,6 +149,12 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            storeFile file('dira-covid19.keystore')
+            storePassword '1q@w3e4r5t6y'
+            keyAlias 'dira-covid19'
+            keyPassword '1q@w3e4r5t6y'
+        }
     }
     buildTypes {
         debug {
@@ -158,6 +164,7 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://facebook.github.io/react-native/docs/signed-apk-android.
             signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
@@ -179,6 +186,8 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-linear-gradient')
+    implementation project(':react-native-webview')
     implementation project(':react-native-reanimated')
     implementation project(':react-native-maps')
     implementation fileTree(dir: "libs", include: ["*.jar"])

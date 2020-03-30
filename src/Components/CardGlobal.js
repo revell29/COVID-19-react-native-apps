@@ -1,12 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { getDataProvinsi } from '../utils/ApiService';
+import { getGlobalData } from '../utils/ApiService';
 import { Actions } from 'react-native-router-flux';
 import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
 import Icon from 'react-native-vector-icons/Entypo';
 
-export default class CardProvinsi extends Component {
+export default class CardGlobal extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -16,18 +16,17 @@ export default class CardProvinsi extends Component {
   }
 
   componentDidMount() {
-    this.getProvinsi();
+    this.getGlobal();
   }
 
   componentWillUnmount() {
-    this.getProvinsi();
+    this.getGlobal();
   }
 
-  getProvinsi() {
-    this.state.visible = false;
-    getDataProvinsi()
+  getGlobal() {
+    getGlobalData()
       .then(response => {
-        this.setState({ data: response.data.slice(0, 4), visible: true });
+        this.setState({ data: response.slice(0, 4), visible: true });
       })
       .catch(error => console.log(error));
   }
@@ -36,18 +35,18 @@ export default class CardProvinsi extends Component {
     const items = this.state.data.map((values, key) => {
       return (
         <View
-          key={values.provinsi.toString()}
+          key={values.key}
           style={{
             paddingBottom: 10,
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
           <View>
-            <Text style={{ fontSize: 14, color: '#E5DDDD' }}>{values.provinsi}</Text>
-            <Text style={{ fontSize: 13, color: '#FC7302' }}>Positif: {values.kasusPosi}</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 140 }}>
-              <Text style={{ fontSize: 13, color: '#04AD95' }}>Sembuh: {values.kasusSemb}</Text>
-              <Text style={{ fontSize: 13, color: '#F82449' }}>Meninggal: {values.kasusMeni}</Text>
+            <Text style={{ fontSize: 15, color: '#E5DDDD' }}>{values.countryRegion}</Text>
+            <Text style={{ fontSize: 13, color: '#FC7302' }}>Positif: {values.confirmed}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 180 }}>
+              <Text style={{ fontSize: 13, color: '#04AD95' }}>Sembuh: {values.recovered}</Text>
+              <Text style={{ fontSize: 13, color: '#F82449' }}>Meninggal: {values.deaths}</Text>
             </View>
           </View>
           <View
@@ -67,8 +66,8 @@ export default class CardProvinsi extends Component {
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          <Text style={styles.title}>Data per provinsi</Text>
-          <TouchableOpacity onPress={() => Actions.pageProvinsi()}>
+          <Text style={styles.title}>Data kasus dunia</Text>
+          <TouchableOpacity onPress={() => Actions.pageGlobal()}>
             <Text style={styles.title2}>view more</Text>
           </TouchableOpacity>
         </View>
@@ -76,25 +75,18 @@ export default class CardProvinsi extends Component {
           <ShimmerPlaceHolder
             colorShimmer={['#171B1E', '#222D34', '#222D34']}
             autoRun={true}
-            duration="2000"
-            visible={this.state.visible}
-            style={{ height: 20, width: '100%', borderRadius: 8, marginBottom: 15 }}>
-            {items}
-          </ShimmerPlaceHolder>
-          <ShimmerPlaceHolder
-            colorShimmer={['#171B1E', '#222D34', '#222D34']}
-            autoRun={true}
-            duration="1200"
-            visible={this.state.visible}
-            style={{ height: 20, width: '100%', borderRadius: 8, marginBottom: 15 }}
-          />
-          <ShimmerPlaceHolder
-            colorShimmer={['#171B1E', '#222D34', '#222D34']}
-            autoRun={true}
             duration="1500"
             visible={this.state.visible}
             style={{ height: 20, width: '100%', borderRadius: 8, marginBottom: 15 }}
           />
+          <ShimmerPlaceHolder
+            colorShimmer={['#171B1E', '#222D34', '#222D34']}
+            autoRun={true}
+            duration="1800"
+            visible={this.state.visible}
+            style={{ height: 20, width: '100%', borderRadius: 8 }}
+          />
+          {items}
         </View>
       </View>
     );

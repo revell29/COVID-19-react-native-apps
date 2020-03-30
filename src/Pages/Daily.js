@@ -1,68 +1,82 @@
+/* eslint-disable no-const-assign */
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from 'react';
 import { View, Text, SafeAreaView, FlatList, StyleSheet } from 'react-native';
 import MyStatusBar from '../Components/MyStatusBar';
 import NavbarPage from '../Components/NavbarPage';
-import SearchBar from '../Components/SearchBar';
+import { getDaily } from '../utils/ApiService';
 import EmptyData from '../Components/EmptyData';
-import { getDataProvinsi } from '../utils/ApiService';
+import _ from 'lodash';
+import Moment from 'moment';
 import Icon from 'react-native-vector-icons/Entypo';
 
-export default class PageProvin extends Component {
+export default class Daily extends Component {
   constructor(props) {
     super(props);
     this.state = {
       data: [],
       fullData: [],
-      text: '',
       isFetching: true,
+      text: '',
     };
   }
 
   componentDidMount() {
-    this.getDataProvinsi();
+    this.getGlobal();
   }
 
-  async getDataProvinsi() {
-    await getDataProvinsi()
+  getGlobal = _.debounce(async () => {
+    await getDaily()
       .then(response => {
-        this.setState({ data: response.data, fullData: response.data, isFetching: false });
+        response.data.map((item, key) => {
+          item.id = key;
+        });
+        this.setState({
+          fullData: response.data,
+          data: response.data,
+          isFetching: false,
+        });
       })
       .catch(error => console.log(error));
-  }
+  }, 250);
 
   onRefresh = () => {
     this.setState({ isFetching: true });
     setTimeout(() => {
-      this.getDataProvinsi();
+      this.getGlobal();
     }, 1000);
-  };
-
-  handleSearch = text => {
-    const query = text.trim().toLowerCase();
-    const data = this.state.fullData;
-    const newData = data.filter(q => {
-      return q.provinsi.toLowerCase().match(query);
-    });
-    this.setState({ data: newData, text: text });
   };
 
   renderItem = ({ item }) => {
     return (
       <View style={styles.card}>
         <View>
-          <Text style={{ fontSize: 14, color: '#E5DDDD' }}>{item.provinsi}</Text>
-          <Text style={{ fontSize: 13, color: '#FC7302' }}>Positif: {item.kasusPosi}</Text>
+          <Text style={{ fontSize: 14, color: '#E5DDDD' }}>
+            {Moment(item.tanggal).format('DD MMM')} (Hari ke-{item.harike})
+          </Text>
+          <Text style={{ fontSize: 13, color: '#FC7302' }}>
+            Positif: {item.jumlahKasusKumulatif}
+          </Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 140 }}>
-            <Text style={{ fontSize: 13, color: '#04AD95' }}>Sembuh: {item.kasusSemb}</Text>
-            <Text style={{ fontSize: 13, color: '#F82449' }}>Meninggal: {item.kasusMeni}</Text>
+            <Text style={{ fontSize: 13, color: '#04AD95' }}>
+              Sembuh: {item.jumlahPasienSembuh}
+            </Text>
+            <Text style={{ fontSize: 13, color: '#F82449' }}>
+              Meninggal: {item.jumlahPasienMeninggal}
+            </Text>
           </View>
         </View>
         <View
           style={{
             justifyContent: 'center',
+            alignItems: 'center',
           }}>
-          <Icon name="info-with-circle" color="#048AD6" size={20} />
+          <Icon
+            size={20}
+            name="line-graph"
+            color={item.jumlahKasusBaruperHari > 0 ? '#FC7302' : 'white'}
+          />
+          <Text style={{ color: '#048AD6' }}>Kasus baru {item.jumlahKasusBaruperHari}</Text>
         </View>
       </View>
     );
@@ -72,18 +86,21 @@ export default class PageProvin extends Component {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#171B1E' }}>
         <MyStatusBar />
-        <NavbarPage title="Provinsi" />
+        <NavbarPage title="Data Harian" />
         <View>
-          <SearchBar onChangeText={this.handleSearch} placeholder="Search" />
+          {/* <SearchBar onChangeText={this.handleSearch} placeholder="Search" /> */}
           <FlatList
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
-              paddingBottom: 150,
+              paddingBottom: 115,
+              paddingTop: 20,
             }}
             onRefresh={() => this.onRefresh()}
             refreshing={this.state.isFetching}
-            keyExtractor={item => item.fid.toString()}
-            data={this.state.data}
+            keyExtractor={item => item.id}
+            data={this.state.fullData.sort((a, b) => {
+              return a.hariKe > b.hariKe;
+            })}
             renderItem={this.renderItem}
           />
           {this.state.data.length === 0 && !this.state.isFetching && <EmptyData />}
